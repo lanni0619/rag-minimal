@@ -2,6 +2,7 @@
 
 import uuid
 from langchain_qdrant import QdrantVectorStore
+from langchain_core.tools import tool
 from langchain_core.documents import Document
 
 from rag.embedder import embedder
@@ -23,23 +24,18 @@ vector_store = QdrantVectorStore.from_texts(
     url="http://localhost:6333",
 )
 
-
-def retrieve(query: str, k: int = 2) -> list[tuple[str, str]]:
-    """實際上是會去檢索向量資料庫"""
+@tool
+def retrieve(query: str, k: int = 2) -> str:
+    """Search SOP document excerpts for evidence related to the user question"""
 
     scores: list[tuple[Document, float]] = vector_store.similarity_search_with_score(
         query, k
     )
 
     res = [
-        (doc.metadata["id"], doc.page_content) for (doc, score) in scores if score > 0
+        f"[{doc.metadata['id']}] {doc.page_content}"
+        for (doc, score) in scores
+        if score > 0
     ]
 
-    return res[:k]
-
-
-def best_match_score(query: str) -> float:
-    scores: list[tuple[Document, float]] = vector_store.similarity_search_with_score(
-        query, 1
-    )
-    return scores[0][1] if scores else 0.0
+    return "\n\n".join(res)

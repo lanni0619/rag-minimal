@@ -10,8 +10,8 @@
 
 ## 階段二：真決策工具
 
-- [ ] 4. `retrieve()` 包成 `@tool`，`bind_tools()` 讓 LLM 自己決定呼叫，取代手寫 `SEARCH_AGAIN:` 解析
-- [ ] 5. 裝 Ollama 本地模型，`generate()` 換成 `ChatOllama`（Gemini 保留對照）
+- [x] 4. `retrieve()` 包成 `@tool`，`bind_tools()` 讓 LLM 自己決定呼叫，取代手寫 `SEARCH_AGAIN:` 解析
+- [x] 5. 裝 Ollama 本地模型，`generate()` 換成 `ChatOllama`（Gemini 保留對照）
 - [ ] 6. 加「問題不清楚就反問使用者」分支（對照 dummies README Step 6 Clarification Boundary）
 
 ## 階段三：真 orchestration 框架

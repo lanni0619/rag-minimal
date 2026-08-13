@@ -11,6 +11,9 @@ python-dotenv = "*"
 dotenv = "*"
 langchain-qdrant = "*"
 qdrant-client = "*"
+langchain-ollama = "*"
+langchain-google-genai = "*"
+langchain-anthropic = "*"
 
 [dev-packages]
 
