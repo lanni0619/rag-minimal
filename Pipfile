@@ -9,6 +9,8 @@ langchain-huggingface = "*"
 sentence-transformers = "*"
 python-dotenv = "*"
 dotenv = "*"
+langchain-qdrant = "*"
+qdrant-client = "*"
 
 [dev-packages]
 

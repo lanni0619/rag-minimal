@@ -1,7 +1,10 @@
+import os
 from langchain_huggingface import HuggingFaceEmbeddings
 
+HUGGING_FACE_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
+
 model_name = "Qwen/Qwen3-Embedding-0.6B"
-model_kwargs = {"device": "cpu"}
+model_kwargs = {"device": "cpu", "token": HUGGING_FACE_TOKEN}
 encode_kwargs = {"normalize_embeddings": False}
 
 embedder: HuggingFaceEmbeddings = HuggingFaceEmbeddings(
@@ -9,8 +12,3 @@ embedder: HuggingFaceEmbeddings = HuggingFaceEmbeddings(
     model_kwargs=model_kwargs,
     encode_kwargs=encode_kwargs,
 )
-
-if __name__ == "__main__":
-    vector = embedder.embed_query("讀卡機故障")
-    print(f"向量維度: {len(vector)}")
-    print(f"前 5 個數字: {vector[:5]}")

@@ -1,24 +1,44 @@
-from rag.embedder import embedder
+# 每筆為 (id, category, text)，category 供之後 Qdrant metadata 使用
 
 DOCS = [
     (
-        "sop_ejector",
-        "電商取貨機 E04 錯誤代碼：出貨機構卡件，通常是彈簧片鬆脫或包裹卡在滑軌，需重新校正彈出機構。",
+        "sop_card_stuck",
+        "讀卡機",
+        "卡片卡在讀卡機無法退出，需按緊急退卡鍵或重啟讀卡機模組。",
     ),
     (
-        "sop_paylane",
-        "停車繳費機無法讀卡：通常是讀卡機積塵或磁條讀取頭故障，先用酒精棉清潔讀卡頭再測試。",
+        "sop_card_misread",
+        "讀卡機",
+        "感應卡讀取失敗率高，通常是磁條或晶片污損、讀卡頭故障，先用酒精棉清潔讀卡頭再測試。",
     ),
     (
-        "sop_printer",
-        "繳費機收據列印不出來：熱感應印表機缺紙或卡紙，需打開上蓋檢查紙捲並重新裝填。",
+        "sop_card_declined",
+        "讀卡機",
+        "交易一直顯示拒絕，需檢查網路連線與收單行狀態，通常非讀卡機硬體問題。",
+    ),
+    (
+        "sop_printer_jam",
+        "列印",
+        "收據列印到一半卡紙，需開上蓋清除碎紙後重新裝填熱感應紙。",
+    ),
+    (
+        "sop_printer_blank",
+        "列印",
+        "收據印出來是空白，通常是熱感應紙裝反或印字頭故障。",
+    ),
+    (
+        "sop_coin_jam",
+        "找零",
+        "投幣孔卡幣導致無法找零，需清空找零盒並重新校正投幣感測器。",
+    ),
+    (
+        "sop_coin_shortage",
+        "找零",
+        "找零機構顯示零錢不足，需人工補幣或暫停找零功能。",
     ),
     (
         "sop_network",
-        "設備斷網無法回傳交易紀錄：檢查4G模組訊號燈，重啟路由器，確認APN設定是否正確。",
+        "網路",
+        "設備斷網無法回傳交易紀錄，需檢查4G模組訊號燈、重啟路由器、確認APN設定是否正確。",
     ),
-]
-
-DOC_VECTORS: list[tuple[str, str, list[float]]] = [
-    (id, text, embedder.embed_query(text)) for (id, text) in DOCS
 ]

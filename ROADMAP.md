@@ -6,7 +6,7 @@
 
 - [x] 1. 裝 `langchain_huggingface`，跑通 `HuggingFaceEmbeddings`，印出向量維度
 - [x] 2. `retrieval.py` 的 `to_vector`/`cosine_similarity` 換成真 embedding 版本
-- [ ] 3. 裝 Qdrant，SOP 文件存進去，`retrieve()` 改呼叫 `similarity_search`
+- [x] 3. 裝 Qdrant，SOP 文件存進去，`retrieve()` 改呼叫 `similarity_search`
 
 ## 階段二：真決策工具
 

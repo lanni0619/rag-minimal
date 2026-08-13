@@ -44,4 +44,4 @@ def rag(query: str) -> str:
 
 
 if __name__ == "__main__":
-    answer = rag("設備壞了")
+    answer = rag("印表機無法列印")
