@@ -1,5 +1,6 @@
 """A + G — Augment：把檢索結果塞進 prompt；Generate：呼叫 LLM。"""
 
+from typing import TypedDict
 from dotenv import load_dotenv
 
 from langchain_ollama import ChatOllama
@@ -20,7 +21,9 @@ tools = [retrieve]
 tool_map = {tool.name: tool for tool in tools}
 llm_with_tools = llm.bind_tools(tools)
 
-SYSTEM_PROMPT = "你是維修助手，只能根據 retrieve 工具查到的文件回答問題，不能用自己的知識回答。收到問題時一定要先呼叫 retrieve 查詢。"
+# LLM Global Behavior
+SYSTEM_PROMPT = "你是維修助手，只能根據工具查到的文件回答問題，查到的文件若與問題不直接相關，優先修改問句重複調用工具重新查詢，而非反問使用者，若工具最終還是查不到適合的答案，可以根據工具查到的資料來提供使用者方向，但不要臆測或列出不相關資料供使用者篩選，沒有資料可參考時回覆『查無相關SOP資料，請向工程人員確認』。" \
+    "\n\n## Clarification Boundary\n只有當問題完全沒有提到具體的機台名稱或故障現象（例如只說「幫我修一下」「壞了」），導致無法組成任何檢索關鍵字時，才直接反問使用者提供更多資訊，不要呼叫工具。\n只要問題包含任何具體的機台、部件、或現象描述，就視為足夠清楚，直接呼叫工具查詢，不要因為敘述簡短或未講明細節就反問。"
 
 MessagesType = list[SystemMessage | HumanMessage | AIMessage | ToolMessage]
 
@@ -54,7 +57,7 @@ def generate(prompt: str) -> str:
         elif not ai_response.content:
             return "查無相關資料"
         else:
-            content: dict[str, str] = ai_response.content[0]
+            content = ai_response.content[0]
             return content.get("text")
     except Exception as e:
         return f"[Generation error] - {e}"

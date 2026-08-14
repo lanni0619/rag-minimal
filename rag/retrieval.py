@@ -26,7 +26,12 @@ vector_store = QdrantVectorStore.from_texts(
 
 @tool
 def retrieve(query: str, k: int = 2) -> str:
-    """Search SOP document excerpts for evidence related to the user question"""
+    """
+    1. 收到使用者的問題時第一步都先調用此函式來尋找相關資料。
+    2. 辨識回傳結果是否「直接」對應到使用者的問題（分類、關鍵字不符即視為不足），而非模稜兩可的答案。
+    3. 若不足以回答問題，禁止直接反問使用者補充描述；必須先修改問句關鍵字重新調用本函式，最多重試 2 次。
+    4. 重試 2 次後仍無法直接回答，才回覆「查無相關資料」，不得用不相關文件拼湊答案。
+    """
 
     scores: list[tuple[Document, float]] = vector_store.similarity_search_with_score(
         query, k
@@ -35,7 +40,7 @@ def retrieve(query: str, k: int = 2) -> str:
     res = [
         f"[{doc.metadata['id']}] {doc.page_content}"
         for (doc, score) in scores
-        if score > 0
+        if score > 0.75
     ]
 
     return "\n\n".join(res)
