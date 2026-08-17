@@ -14,6 +14,8 @@ qdrant-client = "*"
 langchain-ollama = "*"
 langchain-google-genai = "*"
 langchain-anthropic = "*"
+langgraph = "*"
+ipython = "*"
 
 [dev-packages]
 
