@@ -1,10 +1,10 @@
 from dotenv import load_dotenv
-from typing import Literal
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
+from langgraph.types import Command
 
 from rag.retrieval import retrieve
 
@@ -14,7 +14,7 @@ load_dotenv()
 
 # Initial llm model (gemini-3.1-flash-lite/gemini-3.5-flash-lite/gemma-4-31b-it)
 tools = [retrieve]
-llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0, seed=42)
+llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", temperature=0, seed=42)
 llm_with_tools = llm.bind_tools(tools)
 
 # LLM Global Behavior
@@ -30,30 +30,23 @@ def call_llm(state: MessagesState):
 
     messages = state["messages"]
     ai_response = llm_with_tools.invoke(messages)
+    update = {"messages": [ai_response]}
 
-    return {"messages": [ai_response]}
+    # 使用 Command 模式取代用 Edge 的路由方式
+    if ai_response.tool_calls:
+        return Command(goto="call_tools", update=update) # call_llm -> call_tools
 
-
-def should_call_tools(state: MessagesState) -> Literal["call_tools", END]:
-    messages = state["messages"]
-    last_message = messages[-1]
-
-    if isinstance(last_message, AIMessage) and last_message.tool_calls:
-        return "call_tools"
-
-    return END
-
+    return Command(goto=END, update=update) # call_llm -> END
 
 # ========= Init Agent ==========
 
 agent_builder = StateGraph(MessagesState)
+# Nodes
 agent_builder.add_node(call_llm)
 agent_builder.add_node("call_tools", ToolNode(tools))
-
-agent_builder.add_edge(START, "call_llm")
-agent_builder.add_conditional_edges("call_llm", should_call_tools, ["call_tools", END])
-agent_builder.add_edge("call_tools", "call_llm")
-
+# Edges
+agent_builder.add_edge(START, "call_llm") # START -> call_llm
+agent_builder.add_edge("call_tools", "call_llm") # call_tools -> call_llm
 agent = agent_builder.compile()
 
 
