@@ -6,6 +6,10 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.store.memory import InMemoryStore
+
 from rag.retrieval import retrieve
 
 
@@ -24,6 +28,7 @@ SYSTEM_PROMPT = (
 )
 
 # ========== Build Langgrah Node ==========
+
 
 def call_llm(state: MessagesState):
     """Orchestrator Node"""
@@ -44,7 +49,11 @@ def should_call_tools(state: MessagesState) -> Literal["call_tools", END]:
     return END
 
 
-# ========= Init Agent ==========
+# ========= Init Checkpointer & Agent ==========
+
+checkpointer = InMemorySaver()
+store = InMemoryStore()
+config: RunnableConfig = {"configurable": {"thread_id": "1"}}
 
 agent_builder = StateGraph(MessagesState)
 agent_builder.add_node(call_llm)
@@ -54,17 +63,30 @@ agent_builder.add_edge(START, "call_llm")
 agent_builder.add_conditional_edges("call_llm", should_call_tools, ["call_tools", END])
 agent_builder.add_edge("call_tools", "call_llm")
 
-agent = agent_builder.compile()
+agent = agent_builder.compile(
+    checkpointer=checkpointer, store=store, interrupt_before=["call_tools"]
+)
 
 
 # ========= External Function ==========
+
 
 def generate(prompt: str) -> str:
     """Call LLM to generate answer"""
     messages = [SystemMessage(SYSTEM_PROMPT), HumanMessage(prompt)]
 
     try:
-        response = agent.invoke({"messages": messages})
+        agent.invoke({"messages": messages}, config)
+
+        state_snapshot = agent.get_state(config)
+
+        if not state_snapshot.next:
+            response = state_snapshot.values
+
+        while state_snapshot.next:
+            response = agent.invoke(None, config)
+            state_snapshot = agent.get_state(config)
+
         content: list | str = response["messages"][-1].content
 
         if isinstance(content, str):

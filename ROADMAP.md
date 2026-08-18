@@ -19,8 +19,8 @@
 - [x] 7. 讀懂 dummies README Step 7 `AgentState` 欄位（`tool_call_count`/`iteration_count` 對應自己寫的 `max_retries`）
 - [x] 8. 把 `rag()` 迴圈改寫成最小 LangGraph `StateGraph`（單一 orchestrator node + tools node，跑通即可）
 - [x] 9. 摸 `ToolNode`：用內建的 `ToolNode` 取代自己寫的 tool_map for-loop，看差在哪
-- [ ] 10. 摸 `Command` 條件路由：寫一個 `route_after_orchestrator_call` 風格的分支函式，體會「node 回傳決定下一步走哪」的模式
-- [ ] 11. 摸 checkpointer：`InMemorySaver()` 存一次 state，體會「中斷後從哪個 node 繼續」是怎麼運作的
+- [x] 10. 摸 `Command (edgeless)` 條件路由：寫一個 `route_after_orchestrator_call` 風格的分支函式，體會「node 回傳決定下一步走哪」的模式
+- [x] 11. 摸 checkpointer：`InMemorySaver()` 存一次 state，體會「中斷後從哪個 node 繼續」是怎麼運作的
 - [ ] 12. 摸 subgraph 組合：`State`（外層）包 `AgentState`（內層）的巢狀 graph 是怎麼接起來的，不用真的用上
 
 ## 之後再看要不要繼續
